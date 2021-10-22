@@ -1,0 +1,81 @@
+---
+title: "Assessment 1"
+author: "Tri Nguyen"
+date: "10/18/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(skimr)
+```
+
+#Rmakrdown Editing 
+
+*italic*
+**bold**
+
+```{r}
+fastfood<-read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-09-04/fastfood_calories.csv")
+
+fastfood%>%head(n=10)
+
+knitr::kable(fastfood[1:10,1:5])
+
+```
+
+#8 filter
+```{r}
+fastfood%>%
+  filter(
+    calories > 1000  
+  )
+```
+
+9. dont_eat_this<-filter
+arrange(desc(X1))
+
+```{r}
+dont_eat_this<-
+  filter(
+    total_fat > 40,
+    total_carb > 80
+  ) +
+  
+```
+
+10.
+
+```{r}
+fastfood%>%
+  mutate(
+    heavy_food=case_when(
+      calories>500~"heavy",
+      calories<259~"low",
+      T~"average"
+    )
+    )%>%
+  count(heavy_food, sort=TRUE)
+```
+
+11.
+```{r}
+skim(fastfood)
+```
+
+12.
+count(sort=)
+distinct
+
+13. 
+group_by(restaurant)
+summarise(avr_cal=mean(calories))
+
+14. 
+mutate(
+v1=mean(),
+v2=max(),
+v3=min(),
+)
+
