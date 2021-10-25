@@ -152,9 +152,6 @@ fastfood %>%
 
 ```{r}
 fastfood%>%mutate(restaurant=as_factor(restaurant))
-
-fastfood%>%mutate(item=as_factor(item))
-
 fastfood%>%skim()
 ```
 
@@ -167,7 +164,7 @@ calories_type <- fastfood %>%
   group_by(restaurant) %>% 
   mutate(calories_type = cut_number(calories, n = 3, labels = c("low","med","high"))) %>% 
   ungroup() %>% 
-  arrange(calories_type)
+  arrange(calories_type, desc(calories))
 head(calories_type %>% select(restaurant,item,calories,calories_type))
 ```
 
