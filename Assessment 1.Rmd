@@ -21,7 +21,7 @@ library(knitr)
 https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-09-04/fastfood_calories.csv
 The name of the variable should be `fastfood`
 
-```{r}
+```{r, message=FALSE}
 fastfood<-read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-09-04/fastfood_calories.csv")
 ```
 
@@ -191,6 +191,7 @@ trans_fat_percent <- fastfood %>%
   ungroup()
 head(trans_fat_percent %>% select(restaurant,item,trans_fat,total_fat,trans_fat_percent))
 ```
+
 #22.Create a dataviz that shows the distribution of `trans_fat` in food items for each type of restaurant. Think carefully about the choice of data viz. Use facets, coordinates and theme layers to make your data viz visually appealing and meaningful.
 
 ```{r}
