@@ -17,10 +17,12 @@ library(widyr)
 ```
 
 # Assessment 2
+
 ---
 
 ## *Tri Nguyen*
-## **s4623781*
+## **s4623781**
+
 ---
 
 ### Creating a dataset variable
@@ -84,6 +86,7 @@ data %>%
     axis.text.x=element_blank(), 
     axis.ticks.x=element_blank())
 ```
+
 First I filter out the unimportant values such as the N/A, I don't know, and Other(please specify). These values shows no information on how the main dish would be prepared so I only choose the Baked, Fried, and Roasted. I use filtered those out and facet wrap in gg plot to show 3 different data visualization according to the three values from main prep. It can be seen that Turkey has the most count in every three categories.
 
 ### 7. How many use cranberry sauce? How many use gravy? 2marks
@@ -110,6 +113,7 @@ data%>%
   ggtitle("People who celebrates")
 
 ```
+
 First of all, I create a new variable called `family_income_1` by getting the first number of non-numeric characters in variable `family_income` and getting the numbers without `N/A`. Then, I choose who people celebrate with `yes` ticks and visualise it to see its distribution.
 
 ### 10. Use the following code to create a new data set 2 mark. Write 2-3 sentences with your explanation of what it does. (4 marks)
@@ -141,7 +145,7 @@ correlation%>%
 The function shows how `id` and `value` correlated with each other, for example, "Rolls/biscuits" and "Mashed potatoes" shows the highest correlation as shown from the table.
 
 ### 13. Use `lm()` or randomForest() function to build a model that predict a family income based on data in the dataset. 8 marks
-### Compare 3 models using different set of input variables. Use different number of variables.Explain your choice of variables (3 sentences). Write 2 sentences explaining which model is best.
+### Compare 3 models using different set of input variables. Use different number of variables. 
 
 ```{r}
 data%>%distinct(family_income)
@@ -149,7 +153,6 @@ data%>%count(family_income, sort=TRUE)
 ```
 
 ### Recording variables as factors
-
 ```{r}
 data<-data%>%mutate(main_dish=as_factor(main_dish))
 data<-data%>%mutate(main_prep=as_factor(main_prep))
@@ -159,8 +162,8 @@ data<-data%>%mutate(community_type=as_factor(community_type))
 data<-data%>%mutate(family_income=as_factor(family_income))
 ```
 
-
 ### Classification for Family_income using Random Forest 
+#### Model 1
 ```{r}
 rf<-randomForest(
   family_income~main_dish+cranberry+age+community_type+us_region, 
@@ -170,3 +173,31 @@ rf<-randomForest(
 )
 print(rf)
 ```
+
+#### Model 2
+```{r}
+rf<-randomForest(
+  family_income~main_dish+cranberry+age+us_region, 
+  na.action = na.omit,
+  data=data,
+  importance=TRUE
+)
+print(rf)
+```
+
+#### Model 3
+```{r}
+rf<-randomForest(
+  family_income~main_dish+cranberry+age, 
+  na.action = na.omit,
+  data=data,
+  importance=TRUE
+)
+print(rf)
+```
+
+### Explain your choice of variables (3 sentences). 
+There are 3 models in which model 1 has  variables `main_dish`, `cranberry`, `age`, `community_type` and `us_region`; model 2 does not have variable `community_type`; while model 3 does not have variables `community_type` and `us_region`. Variable `community_type` is removed because I believe it does not affect classification of `family_income` that family income distribution of all regions is equal. Removing `community_type` leads to an increase of accuracy rate from 82.43% (model 1) to 85.26% (model 2), so I continue removing it together with `us_region` which I believe people in us regions have equivalent amount of income. 
+
+### Write 2 sentences explaining which model is best.
+The best model is model 2 because the accuracy rate is highest (85.26%), followed by 82.43% (model 2) and 80.58% (model 2). Removing `us_region` in the model 3 might be not a good option because it leads to a decrease of accuracy rate of the model, however, only numbers in column `$25,000 to $49,999` are high, numbers in the rest columns are small.  
