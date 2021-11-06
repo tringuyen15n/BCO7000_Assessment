@@ -157,3 +157,4 @@ rf<-randomForest(
 print(rf)
 ```
 
+s
