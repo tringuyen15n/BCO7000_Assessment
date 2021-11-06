@@ -1,0 +1,159 @@
+---
+title: "Assignment2"
+author: "Tri Nguyen s4623781"
+date: "10/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(knitr)
+library(tidyverse)
+library(skimr)
+library(ggplot2)
+library(randomForest)
+library(widyr)
+```
+
+# Assessment 2
+---
+
+## *Tri Nguyen*
+## **s4623781*
+---
+
+### Creating a dataset variable
+```{r, message=FALSE}
+data<-read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-11-20/thanksgiving_meals.csv")
+```
+
+### Part 2: Data Wrangling and visualization 38 marks
+### For all tables below, you need to use the RMarkdown functionality to present tables (`kable`). 
+
+### 1. Display the first 10 rows of the dataset using `kable()` function (1 marks). 
+```{r}
+knitr::kable(data[1:10,])
+```
+
+### 2. Using `skim()` display the summary of variables. 
+```{r}
+skim(data)
+```
+
+### Think about the task to predict a family income based on their menu: what variables may be useful? Are all of them correct type? Write 2-3 sentences with your explanation. (2 marks)
+One of the variable would be the main_dish variable, because the main_dish is logically more expensive than the side dishes and this can be a indicator which main_dish can predict the family income. Another variable is age, because usually the older the person, they have higher family income. Another variable would be travel because if they travel further means they have higher family income to spend on their holiday.
+
+### Think about the task to predict a community type or US_region based on their menu: what variables may be useful? Are all of them correct type? (2 marks)
+Main_dish variable can be one of the predictor to a community type or US_region because different people from different region might have different main dish and another variable is family income. Family income can be a predictor in this case because usually urban areas are much more expensive and rural are much cheaper which family income can help predict.
+
+### 3. Use `fct_reorder` and `parse_number` functions to create a factor variable `family_income`(2 mark).
+
+```{r}
+data<-data %>%
+  mutate(family_income_1 = fct_reorder(
+    family_income, parse_number(family_income))) %>%
+  filter(!is.na(family_income))
+```
+
+### 4. What is the number of people who celebrate? (1 mark)
+```{r}
+data%>%
+  filter(celebrate=="Yes") %>%
+  count(celebrate)
+```
+
+### 5. What are categories and insights for each main dish served and the method it is prepared? (2 marks)
+```{r}
+kable(data %>%
+  count(main_dish, main_prep, sort = TRUE) %>%
+  filter(!is.na(main_dish) & !is.na(main_prep)))
+```
+
+There is the main prep where it is how the main dish is made. There are several categories from how the main dish are cooked, such as Roasted, Fried, Baked and others. This main prep variable can be a predictor to main dish because it is related to main dish as main prep shows how the people are creating their main dish.
+
+### 6. Create 3 different data viz showing insights for main dish served and the method. Provide your own legend and use themes. Write 2-3 sentences with your explanation of each insight. (4 marks)
+```{r}
+data %>%
+  filter(main_prep == "Baked" | main_prep == "Fried" | main_prep == "Roasted") %>%
+  ggplot(aes(main_dish, fill = main_dish)) + 
+  geom_bar() + 
+  facet_wrap(vars(main_prep)) +
+  theme(
+    axis.title.x=element_blank(), 
+    axis.text.x=element_blank(), 
+    axis.ticks.x=element_blank())
+```
+First I filter out the unimportant values such as the N/A, I don't know, and Other(please specify). These values shows no information on how the main dish would be prepared so I only choose the Baked, Fried, and Roasted. I use filtered those out and facet wrap in gg plot to show 3 different data visualization according to the three values from main prep. It can be seen that Turkey has the most count in every three categories.
+
+### 7. How many use cranberry sauce? How many use gravy? 2marks
+```{r}
+kable(data %>%
+  filter(!is.na(cranberry) & cranberry!="None") %>%
+  count(), "pipe")
+
+kable(data %>%
+  filter(gravy=="Yes") %>%
+  count(gravy), "pipe")
+```
+
+
+### 8-9. What is the distribution of those who celebrate across income ranges. Create a data viz. Write 2-3 sentences with your explanation of each insight. (4 marks)
+```{r}
+data<-data %>%
+  mutate(family_income_1 = parse_number(family_income)) %>%
+  filter(!is.na(family_income) & !is.na(family_income_1))
+
+data%>%
+  filter(celebrate == "Yes")%>%
+  ggplot(aes(family_income_1))+ 
+  geom_bar(aes(family_income_1)) +
+  ggtitle("People who celebrates")
+```
+
+
+### 10. Use the following code to create a new data set 2 mark. Write 2-3 sentences with your explanation of what it does. (4 marks)
+
+```{r}
+corelation<-data%>%
+  select(id, starts_with("side"),
+         starts_with("pie"),
+         starts_with("dessert")) %>%
+  select(-side15, -pie13, -dessert12) %>%
+  gather(type, value, -id) %>%
+  filter(!is.na(value),
+         !value %in% c("None", "Other (please specify)")) %>%
+  mutate(type = str_remove(type, "\\d+"))
+```
+
+### 11-12. Intall package `widyr` and use `pairwise_cor()` function https://www.rdocumentation.org/packages/widyr/versions/0.1.3/topics/pairwise_cor
+### Write 2-3 sentences with your explanation of what it does. (2 marks)
+### Use this code for the new dataset. 
+pairwise_cor(value, id, sort = TRUE)
+### Write 1 sentence with your explanation of what insights it shows. (2 marks)
+
+```{r}
+corelation%>%
+  pairwise_cor(value, id, sort = TRUE)
+```
+
+
+### 13. Use `lm()` or randomForest() function to build a model that predict a family income based on data in the dataset. 8 marks
+### Compare 3 models using different set of input variables. Use different number of variables.Explain your choice of variables (3 sentences). Write 2 sentences explaining which model os best.
+
+```{r}
+data%>%distinct(family_income)
+data%>%count(family_income, sort=TRUE)
+```
+
+#Classification for Family_income using Random Forest 
+```{r}
+rf<-randomForest(
+  family_income_1~main_dish+cranberry+age+community_type+us_region, 
+  na.action = na.omit,
+  data=data,
+  importance=TRUE
+)
+print(rf)
+```
+
