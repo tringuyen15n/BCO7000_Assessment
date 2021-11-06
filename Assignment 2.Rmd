@@ -97,7 +97,6 @@ kable(data %>%
   count(gravy), "pipe")
 ```
 
-
 ### 8-9. What is the distribution of those who celebrate across income ranges. Create a data viz. Write 2-3 sentences with your explanation of each insight. (4 marks)
 ```{r}
 data<-data %>%
@@ -109,13 +108,14 @@ data%>%
   ggplot(aes(family_income_1))+ 
   geom_bar(aes(family_income_1)) +
   ggtitle("People who celebrates")
-```
 
+```
+First of all, I create a new variable called `family_income_1` by getting the first number of non-numeric characters in variable `family_income` and getting the numbers without `N/A`. Then, I choose who people celebrate with `yes` ticks and visualise it to see its distribution.
 
 ### 10. Use the following code to create a new data set 2 mark. Write 2-3 sentences with your explanation of what it does. (4 marks)
 
 ```{r}
-corelation<-data%>%
+correlation<-data%>%
   select(id, starts_with("side"),
          starts_with("pie"),
          starts_with("dessert")) %>%
@@ -126,35 +126,47 @@ corelation<-data%>%
   mutate(type = str_remove(type, "\\d+"))
 ```
 
-### 11-12. Intall package `widyr` and use `pairwise_cor()` function https://www.rdocumentation.org/packages/widyr/versions/0.1.3/topics/pairwise_cor
-### Write 2-3 sentences with your explanation of what it does. (2 marks)
-### Use this code for the new dataset. 
-pairwise_cor(value, id, sort = TRUE)
-### Write 1 sentence with your explanation of what insights it shows. (2 marks)
+First, I select variable `id` getting from all columns from variables `side1` to `side15`, variables `pie1` to `pie13` and variables `dessert1` to `dessert12`; but get rid of `side15`, `pie13` and `dessert12`. Then, I gather columns thanks to selected `id` but ignore "N/A", non-value, "None" and "Other (please specify)". Finally I remove numbers in the string, for example, change "side1" to "side" and save the data set named "correlation". 
+
+### 11-12. Intall package `widyr` and use `pairwise_cor()` function
+#### Write 2-3 sentences with your explanation of what it does. (2 marks)
+Function `pairwise_cor()` in the package `widyr` is used to find correlations of pairs of items in a column. It is based on a "feature" column that links them together. 
+
+#### Use this code for the new dataset. Write 1 sentence with your explanation of what insights it shows. (2 marks)
 
 ```{r}
-corelation%>%
+correlation%>%
   pairwise_cor(value, id, sort = TRUE)
 ```
-
+The function shows how `id` and `value` correlated with each other, for example, "Rolls/biscuits" and "Mashed potatoes" shows the highest correlation as shown from the table.
 
 ### 13. Use `lm()` or randomForest() function to build a model that predict a family income based on data in the dataset. 8 marks
-### Compare 3 models using different set of input variables. Use different number of variables.Explain your choice of variables (3 sentences). Write 2 sentences explaining which model os best.
+### Compare 3 models using different set of input variables. Use different number of variables.Explain your choice of variables (3 sentences). Write 2 sentences explaining which model is best.
 
 ```{r}
 data%>%distinct(family_income)
 data%>%count(family_income, sort=TRUE)
 ```
 
-#Classification for Family_income using Random Forest 
+### Recording variables as factors
+
+```{r}
+data<-data%>%mutate(main_dish=as_factor(main_dish))
+data<-data%>%mutate(main_prep=as_factor(main_prep))
+data<-data%>%mutate(cranberry=as_factor(cranberry))
+data<-data%>%mutate(age=as_factor(age))
+data<-data%>%mutate(community_type=as_factor(community_type))
+data<-data%>%mutate(family_income=as_factor(family_income))
+```
+
+
+### Classification for Family_income using Random Forest 
 ```{r}
 rf<-randomForest(
-  family_income_1~main_dish+cranberry+age+community_type+us_region, 
+  family_income~main_dish+cranberry+age+community_type+us_region, 
   na.action = na.omit,
   data=data,
   importance=TRUE
 )
 print(rf)
 ```
-
-s
